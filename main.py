@@ -1,12 +1,14 @@
-from pkg.plugin.context import register, handler, BasePlugin, EventContext
+from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
 from pkg.plugin.events import *
+
 import random
 
 @register(name="RussianRoulette", description="A Russian Roulette game plugin", version="1.0", author="kirifujinagisa")
 class RussianRoulettePlugin(BasePlugin):
 
     def __init__(self, host: APIHost):
-        pass
+        self.chamber = [False] * 6  # 初始时6个弹槽都为空
+        self.bullet_index = random.randint(0, 5)  # 随机选择一个弹槽放入子弹
 
     async def initialize(self):
         pass
@@ -19,18 +21,18 @@ class RussianRoulettePlugin(BasePlugin):
                 empty_slots = [i for i, x in enumerate(self.chamber) if not x]
                 slot_to_load = random.choice(empty_slots)
                 self.chamber[slot_to_load] = True
-                await ctx.send_message(ctx.event.sender_id, "上弹完成，当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
+                await ctx.send_message("上弹完成，当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
             else:
-                await ctx.send_message(ctx.event.sender_id, "弹槽已满，无法再上弹")
+                await ctx.send_message("弹槽已满，无法再上弹")
         elif msg == "开枪":
             if any(self.chamber):  # 如果有子弹
-                await ctx.send_message(ctx.event.sender_id, "砰！你中了一枪！游戏结束！")
+                await ctx.send_message("砰！你中了一枪！游戏结束！")
                 self.chamber = [False] * 6  # 重置弹槽
                 self.bullet_index = random.randint(0, 5)  # 重新选择一个弹槽放入子弹
             else:
-                await ctx.send_message(ctx.event.sender_id, "砰！啥也没发生，你很幸运！")
+                await ctx.send_message("砰！啥也没发生，你很幸运！")
         elif msg == "弹槽情况":
-            await ctx.send_message(ctx.event.sender_id, "当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
+            await ctx.send_message("当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
 
     def __del__(self):
         pass
