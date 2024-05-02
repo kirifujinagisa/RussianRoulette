@@ -1,5 +1,5 @@
 from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
-from pkg.plugin.events import *
+from pkg.plugin.events import PersonNormalMessageReceived
 
 import random
 
@@ -21,18 +21,18 @@ class RussianRoulettePlugin(BasePlugin):
                 empty_slots = [i for i, x in enumerate(self.chamber) if not x]
                 slot_to_load = random.choice(empty_slots)
                 self.chamber[slot_to_load] = True
-                await ctx.send_message("上弹完成，当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
+                ctx.add_return("reply", ["上弹完成，当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber])])
             else:
-                await ctx.send_message("弹槽已满，无法再上弹")
+                ctx.add_return("reply", ["弹槽已满，无法再上弹"])
         elif msg == "开枪":
             if any(self.chamber):  # 如果有子弹
-                await ctx.send_message("砰！你中了一枪！游戏结束！")
+                ctx.add_return("reply", ["砰！你中了一枪！游戏结束！"])
                 self.chamber = [False] * 6  # 重置弹槽
                 self.bullet_index = random.randint(0, 5)  # 重新选择一个弹槽放入子弹
             else:
-                await ctx.send_message("砰！啥也没发生，你很幸运！")
+                ctx.add_return("reply", ["砰！啥也没发生，你很幸运！"])
         elif msg == "弹槽情况":
-            await ctx.send_message("当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
+            ctx.add_return("reply", ["当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber])])
 
     def __del__(self):
         pass
