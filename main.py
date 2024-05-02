@@ -3,7 +3,7 @@ from pkg.plugin.events import *
 
 import random
 
-@register(name="RussianRoulette", description="A Russian Roulette game plugin", version="1.0", author="YourName")
+@register(name="RussianRoulette", description="A Russian Roulette game plugin", version="1.0", author="kirifujinagisa")
 class RussianRoulettePlugin(BasePlugin):
 
     def __init__(self, host: APIHost):
