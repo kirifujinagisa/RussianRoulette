@@ -22,17 +22,22 @@ class RussianRoulettePlugin(BasePlugin):
                 slot_to_load = random.choice(empty_slots)
                 self.chamber[slot_to_load] = True
                 ctx.add_return("reply", ["上弹完成，当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber])])
+                ctx.prevent_default()
             else:
                 ctx.add_return("reply", ["弹槽已满，无法再上弹"])
+                ctx.prevent_default()
         elif msg == "开枪":
             if any(self.chamber):  # 如果有子弹
                 ctx.add_return("reply", ["砰！你中了一枪！游戏结束！"])
                 self.chamber = [False] * 6  # 重置弹槽
                 self.bullet_index = random.randint(0, 5)  # 重新选择一个弹槽放入子弹
+                ctx.prevent_default()
             else:
                 ctx.add_return("reply", ["砰！啥也没发生，你很幸运！"])
+                ctx.prevent_default()
         elif msg == "弹槽情况":
             ctx.add_return("reply", ["当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber])])
+            ctx.prevent_default()
 
     def __del__(self):
         pass
