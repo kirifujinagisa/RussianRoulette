@@ -1,49 +1,38 @@
-from pkg.plugin.context import register, handler, llm_func, BasePlugin, APIHost, EventContext
-from pkg.plugin.events import *  # 导入事件类
+from pkg.plugin.context import register, handler, BasePlugin, APIHost, EventContext
+from pkg.plugin.events import *
 
+import random
 
-# 注册插件
-@register(name="Hello", description="hello world", version="0.1", author="RockChinQ")
-class MyPlugin(BasePlugin):
+@register(name="RussianRoulette", description="A Russian Roulette game plugin", version="1.0", author="YourName")
+class RussianRoulettePlugin(BasePlugin):
 
-    # 插件加载时触发
     def __init__(self, host: APIHost):
-        pass
+        self.chamber = [False] * 6  # 初始时6个弹槽都为空
+        self.bullet_index = random.randint(0, 5)  # 随机选择一个弹槽放入子弹
 
-    # 异步初始化
     async def initialize(self):
         pass
 
-    # 当收到个人消息时触发
     @handler(PersonNormalMessageReceived)
     async def person_normal_message_received(self, ctx: EventContext):
-        msg = ctx.event.text_message  # 这里的 event 即为 PersonNormalMessageReceived 的对象
-        if msg == "hello":  # 如果消息为hello
+        msg = ctx.event.text_message
+        if msg == "上弹":
+            if False in self.chamber:  # 如果还有空弹槽
+                empty_slots = [i for i, x in enumerate(self.chamber) if not x]
+                slot_to_load = random.choice(empty_slots)
+                self.chamber[slot_to_load] = True
+                await ctx.send_message("上弹完成，当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
+            else:
+                await ctx.send_message("弹槽已满，无法再上弹")
+        elif msg == "开枪":
+            if any(self.chamber):  # 如果有子弹
+                await ctx.send_message("砰！你中了一枪！游戏结束！")
+                self.chamber = [False] * 6  # 重置弹槽
+                self.bullet_index = random.randint(0, 5)  # 重新选择一个弹槽放入子弹
+            else:
+                await ctx.send_message("砰！啥也没发生，你很幸运！")
+        elif msg == "弹槽情况":
+            await ctx.send_message("当前弹槽情况：" + " ".join(["O" if x else "-" for x in self.chamber]))
 
-            # 输出调试信息
-            self.ap.logger.debug("hello, {}".format(ctx.event.sender_id))
-
-            # 回复消息 "hello, <发送者id>!"
-            ctx.add_return("reply", ["hello, {}!".format(ctx.event.sender_id)])
-
-            # 阻止该事件默认行为（向接口获取回复）
-            ctx.prevent_default()
-
-    # 当收到群消息时触发
-    @handler(GroupNormalMessageReceived)
-    async def group_normal_message_received(self, ctx: EventContext):
-        msg = ctx.event.text_message  # 这里的 event 即为 GroupNormalMessageReceived 的对象
-        if msg == "hello":  # 如果消息为hello
-
-            # 输出调试信息
-            self.ap.logger.debug("hello, {}".format(ctx.event.sender_id))
-
-            # 回复消息 "hello, everyone!"
-            ctx.add_return("reply", ["hello, everyone!"])
-
-            # 阻止该事件默认行为（向接口获取回复）
-            ctx.prevent_default()
-
-    # 插件卸载时触发
     def __del__(self):
         pass
